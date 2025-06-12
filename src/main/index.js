@@ -584,7 +584,7 @@ function createWindow() {
     width: 1680,
     height: 1200,
     show: false,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     icon: icon, // 为所有平台设置图标
     title: '爱下 - 视频号下载器', // 设置窗口标题
     webPreferences: {

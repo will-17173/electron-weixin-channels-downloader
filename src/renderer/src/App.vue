@@ -134,6 +134,16 @@
 
       <!-- 右列：证书管理和代理服务器 -->
       <div class="right-column">
+        <!-- 按钮组 -->
+        <div class="action-buttons-container">
+          <button class="guide-button" title="查看使用指南" @click="showUserGuide">
+            📖 使用指南
+          </button>
+          <button class="donation-button" title="支持开发者" @click="showDonation">
+            💖 赞赏支持
+          </button>
+        </div>
+
         <!-- 证书管理 -->
         <div class="section">
           <h3>🔐 证书管理 <span class="platform-badge">HTTPS</span></h3>
@@ -250,15 +260,35 @@
         </div>
       </div>
     </div>
+
+    <!-- 使用指南组件 -->
+    <UserGuide
+      :visible="showGuide"
+      @update:visible="updateGuideVisible"
+      @dont-show-again="handleDontShowAgain"
+    />
+
+    <!-- 赞赏弹窗组件 -->
+    <DonationModal :visible="showDonationModal" @update:visible="updateDonationVisible" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useAnalytics, AnalyticsEvents, AnalyticsFeatures } from './composables/useAnalytics.js'
+import { useFirstLaunch, useGuideAnalytics } from './composables/useFirstLaunch.js'
+import UserGuide from './components/UserGuide.vue'
+import DonationModal from './components/DonationModal.vue'
 
 // Analytics组合式函数
 const analytics = useAnalytics()
+
+// 首次启动和指南相关
+const { showGuide, setDontShowAgain } = useFirstLaunch()
+const { trackGuideShown, trackGuideClosed } = useGuideAnalytics()
+
+// 赞赏弹窗状态
+const showDonationModal = ref(false)
 
 // 操作系统检测
 const isWindows = computed(() => {
@@ -645,6 +675,36 @@ const setupStatusListeners = () => {
   }
 }
 
+// 使用指南相关方法
+const showUserGuide = () => {
+  showGuide.value = true
+  trackGuideShown(false) // 手动打开
+}
+
+// 赞赏相关方法
+const showDonation = () => {
+  showDonationModal.value = true
+  // 跟踪赞赏弹窗显示事件
+  analytics.trackFeature(AnalyticsFeatures.USER_ENGAGEMENT, 'donation_modal_shown')
+}
+
+const updateDonationVisible = (visible) => {
+  showDonationModal.value = visible
+  if (!visible) {
+    // 跟踪赞赏弹窗关闭事件
+    analytics.trackFeature(AnalyticsFeatures.USER_ENGAGEMENT, 'donation_modal_closed')
+  }
+}
+
+const updateGuideVisible = (visible) => {
+  showGuide.value = visible
+}
+
+const handleDontShowAgain = (dontShow) => {
+  setDontShowAgain(dontShow)
+  trackGuideClosed(dontShow)
+}
+
 // 清理监听器
 const cleanup = () => {
   if (unsubscribeMonitoring) {
@@ -662,6 +722,12 @@ onMounted(async () => {
   await checkCertificate()
   await refreshVideoMonitorStatus()
   setupStatusListeners()
+
+  // 检查是否是首次启动，如果是则显示指南
+  // useFirstLaunch composable会自动处理首次启动检测
+  if (showGuide.value) {
+    trackGuideShown(true) // 首次启动自动显示
+  }
 })
 
 // 组件卸载时清理
@@ -710,6 +776,55 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 20px;
   overflow: auto;
+}
+
+/* 按钮组样式 */
+.action-buttons-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.guide-button,
+.donation-button {
+  flex: 1;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.guide-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.guide-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.donation-button {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.donation-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+}
+
+.guide-button:active,
+.donation-button:active {
+  transform: translateY(0);
 }
 
 /* 右列中的section样式 - 简洁设计 */

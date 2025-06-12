@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户指南功能测试</title>
+    <style>
+        .test-container {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status.success { background: #e8f5e8; color: #2d5a2d; }
+        .status.error { background: #ffeaea; color: #a94442; }
+        .status.warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 用户指南功能测试</h1>
+
+        <div class="test-section">
+            <h2>📋 当前状态</h2>
+            <div id="status-container"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 测试操作</h2>
+            <button class="test-button" onclick="clearStorage()">清除存储</button>
+            <button class="test-button" onclick="checkMainApp()">检查主应用</button>
+            <button class="test-button" onclick="simulateFirstLaunch()">模拟首次启动</button>
+            <button class="test-button" onclick="manualTrigger()">手动触发指南</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 测试结果</h2>
+            <div id="results-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let results = [];
+
+        function addStatus(message, type = 'info') {
+            const container = document.getElementById('status-container');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()} - ${message}`;
+            container.appendChild(div);
+        }
+
+        function addResult(test, result, details = '') {
+            results.push({ test, result, details, time: new Date().toLocaleTimeString() });
+            updateResults();
+        }
+
+        function updateResults() {
+            const container = document.getElementById('results-container');
+            container.innerHTML = results.map(r =>
+                `<div class="status ${r.result ? 'success' : 'error'}">
+                    ${r.time} - ${r.test}: ${r.result ? '✅ 通过' : '❌ 失败'} ${r.details}
+                </div>`
+            ).join('');
+        }
+
+        function clearStorage() {
+            try {
+                localStorage.removeItem('wxdown_first_launch_v1.1.0');
+                localStorage.removeItem('wxdown_guide_settings');
+                addStatus('✅ 存储已清除', 'success');
+                addResult('清除存储', true);
+            } catch (e) {
+                addStatus('❌ 清除存储失败: ' + e.message, 'error');
+                addResult('清除存储', false, e.message);
+            }
+        }
+
+        function checkMainApp() {
+            try {
+                // 检查主应用是否在iframe中或另一个窗口
+                if (window.parent !== window) {
+                    addStatus('ℹ️ 检测到iframe环境', 'warning');
+                }
+
+                // 尝试访问主应用
+                const mainWindow = window.open('http://localhost:5173/', '_blank');
+                if (mainWindow) {
+                    addStatus('✅ 主应用窗口已打开', 'success');
+                    addResult('打开主应用', true);
+
+                    // 5秒后检查窗口状态
+                    setTimeout(() => {
+                        if (!mainWindow.closed) {
+                            addStatus('ℹ️ 主应用仍在运行', 'info');
+                        }
+                    }, 5000);
+                } else {
+                    addStatus('❌ 无法打开主应用窗口', 'error');
+                    addResult('打开主应用', false, '弹窗可能被阻止');
+                }
+            } catch (e) {
+                addStatus('❌ 检查主应用失败: ' + e.message, 'error');
+                addResult('检查主应用', false, e.message);
+            }
+        }
+
+        function simulateFirstLaunch() {
+            try {
+                // 先清除存储
+                localStorage.removeItem('wxdown_first_launch_v1.1.0');
+                localStorage.removeItem('wxdown_guide_settings');
+
+                // 打开主应用进行测试
+                const testWindow = window.open('http://localhost:5173/', 'firstLaunchTest');
+                if (testWindow) {
+                    addStatus('✅ 首次启动测试窗口已打开', 'success');
+                    addResult('模拟首次启动', true);
+
+                    // 监听窗口加载
+                    const checkInterval = setInterval(() => {
+                        try {
+                            if (testWindow.closed) {
+                                clearInterval(checkInterval);
+                                addStatus('ℹ️ 测试窗口已关闭', 'info');
+                                return;
+                            }
+
+                            // 尝试检查窗口中的元素
+                            const guideOverlay = testWindow.document.querySelector('.user-guide-overlay');
+                            if (guideOverlay) {
+                                const isVisible = testWindow.getComputedStyle(guideOverlay).display !== 'none';
+                                addStatus(isVisible ? '✅ 检测到指南已显示' : '⚠️ 指南元素存在但不可见',
+                                         isVisible ? 'success' : 'warning');
+                                addResult('首次启动指南显示', isVisible);
+                                clearInterval(checkInterval);
+                            }
+                        } catch (e) {
+                            // 跨域访问限制，这是正常的
+                        }
+                    }, 1000);
+
+                    // 10秒后停止检查
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                    }, 10000);
+                } else {
+                    addStatus('❌ 无法打开测试窗口', 'error');
+                    addResult('模拟首次启动', false, '窗口被阻止');
+                }
+            } catch (e) {
+                addStatus('❌ 模拟首次启动失败: ' + e.message, 'error');
+                addResult('模拟首次启动', false, e.message);
+            }
+        }
+
+        function manualTrigger() {
+            try {
+                // 打开主应用并尝试手动触发
+                const testWindow = window.open('http://localhost:5173/', 'manualTriggerTest');
+                if (testWindow) {
+                    addStatus('✅ 手动触发测试窗口已打开', 'success');
+
+                    // 等待页面加载
+                    setTimeout(() => {
+                        try {
+                            // 尝试点击指南按钮
+                            const button = testWindow.document.querySelector('.guide-button');
+                            if (button) {
+                                button.click();
+                                addStatus('✅ 已点击指南按钮', 'success');
+                                addResult('手动触发指南', true);
+                            } else {
+                                addStatus('❌ 找不到指南按钮', 'error');
+                                addResult('手动触发指南', false, '按钮不存在');
+                            }
+                        } catch (e) {
+                            addStatus('⚠️ 跨域限制，无法直接操作', 'warning');
+                            addResult('手动触发指南', false, '跨域限制');
+                        }
+                    }, 2000);
+                } else {
+                    addStatus('❌ 无法打开测试窗口', 'error');
+                    addResult('手动触发指南', false, '窗口被阻止');
+                }
+            } catch (e) {
+                addStatus('❌ 手动触发失败: ' + e.message, 'error');
+                addResult('手动触发指南', false, e.message);
+            }
+        }
+
+        // 初始化检查
+        function initialize() {
+            addStatus('🔍 测试页面已加载', 'info');
+
+            // 检查localStorage
+            const firstLaunch = localStorage.getItem('wxdown_first_launch_v1.1.0');
+            const guideSettings = localStorage.getItem('wxdown_guide_settings');
+
+            addStatus(`首次启动标记: ${firstLaunch || '未设置'}`, firstLaunch ? 'warning' : 'info');
+            addStatus(`指南设置: ${guideSettings || '未设置'}`, guideSettings ? 'info' : 'info');
+
+            // 检查主应用连接
+            fetch('http://localhost:5173/')
+                .then(response => {
+                    if (response.ok) {
+                        addStatus('✅ 主应用服务器连接正常', 'success');
+                        addResult('服务器连接', true);
+                    } else {
+                        addStatus('⚠️ 主应用服务器响应异常', 'warning');
+                        addResult('服务器连接', false, `状态码: ${response.status}`);
+                    }
+                })
+                .catch(e => {
+                    addStatus('❌ 无法连接主应用服务器', 'error');
+                    addResult('服务器连接', false, e.message);
+                });
+        }
+
+        // 页面加载后初始化
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
