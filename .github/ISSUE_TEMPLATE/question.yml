@@ -1,0 +1,91 @@
+name: 💬 General Question
+description: 询问使用方法或获取帮助
+title: "[Question]: "
+labels: ["question", "help-wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        您好！👋 欢迎提问！
+
+        在提交问题前，请确保：
+        - [ ] 查看了 [README](../README.md) 文档
+        - [ ] 搜索了现有的讨论和问题
+        - [ ] 查看了 [常见问题解答](../docs/FAQ.md)
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认检查
+      description: 请确认您已经完成以下检查
+      options:
+        - label: 我已经阅读了项目文档
+          required: true
+        - label: 我已经搜索了现有的问题和讨论
+          required: true
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: 🏷️ 问题类型
+      description: 这是什么类型的问题？
+      options:
+        - 使用方法
+        - 安装问题
+        - 配置问题
+        - 功能咨询
+        - 技术支持
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ 您的问题
+      description: 请详细描述您的问题
+      placeholder: 我想了解如何...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📋 相关背景
+      description: 提供一些背景信息有助于我们更好地帮助您
+      placeholder: |
+        - 您想要实现什么？
+        - 您已经尝试了什么？
+        - 遇到了什么困难？
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: 💻 操作系统
+      description: 您使用的操作系统
+      placeholder: Windows 11, macOS Ventura, Ubuntu 22.04, etc.
+
+  - type: input
+    id: app-version
+    attributes:
+      label: 📱 应用版本
+      description: 您使用的应用版本
+      placeholder: v1.0.0
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 📝 其他信息
+      description: 任何其他可能有用的信息
+      placeholder: 任何其他细节...
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ### 💡 提示
+
+        - 对于复杂的问题，建议使用 [GitHub Discussions](../discussions) 进行详细讨论
+        - 如果您发现了bug，请使用 Bug Report 模板
+        - 如果您有功能建议，请使用 Feature Request 模板

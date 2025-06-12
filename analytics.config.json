@@ -1,0 +1,35 @@
+{
+  "analytics": {
+    "enabled":  true,
+    "measurementId": "G-TTCM0XTED7",
+    "apiSecret": "gIXobkKNRQS8_TJNJ3OiUQ",
+    "events": {
+      "app_lifecycle": {
+        "app_start": true,
+        "app_ready": true,
+        "app_quit": true
+      },
+      "user_actions": {
+        "button_click": true,
+        "menu_select": true,
+        "feature_usage": true
+      },
+      "performance": {
+        "startup_time": true,
+        "memory_usage": false,
+        "download_speed": true
+      },
+      "errors": {
+        "app_errors": true,
+        "download_errors": true,
+        "network_errors": true
+      }
+    },
+    "privacy": {
+      "anonymize_ip": true,
+      "respect_dnt": true,
+      "gdpr_compliance": true,
+      "data_retention_days": 90
+    }
+  }
+}

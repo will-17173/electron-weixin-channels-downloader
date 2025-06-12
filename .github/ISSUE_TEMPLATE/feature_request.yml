@@ -1,0 +1,135 @@
+name: 🚀 Feature Request
+description: 建议一个新功能或改进
+title: "[Feature]: "
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您的功能建议！ 🎉
+
+        您的想法有助于让爱下变得更好。请详细描述您的建议，这样我们就能更好地理解和评估它。
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认检查
+      description: 请确认您已经完成以下检查
+      options:
+        - label: 我已经搜索了现有的功能请求
+          required: true
+        - label: 我已经查看了项目路线图
+          required: true
+        - label: 这个功能与项目目标一致
+          required: true
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: 🤔 问题描述
+      description: 这个功能请求解决了什么问题？
+      placeholder: 我总是感到沮丧的是...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution-description
+    attributes:
+      label: 💡 建议的解决方案
+      description: 您希望看到什么样的解决方案？
+      placeholder: 我希望能够...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 替代方案
+      description: 您是否考虑过任何替代解决方案或功能？
+      placeholder: 另一种方法可能是...
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 🏷️ 功能类型
+      description: 这是什么类型的功能？
+      options:
+        - 新功能
+        - 改进现有功能
+        - 用户界面改进
+        - 性能优化
+        - 开发者工具
+        - 文档改进
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📊 优先级
+      description: 您认为这个功能的优先级如何？
+      options:
+        - 低 - 有了更好，没有也无所谓
+        - 中 - 会显著改善用户体验
+        - 高 - 对项目成功很重要
+        - 紧急 - 阻碍了重要功能的使用
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: 👤 用户故事
+      description: 从用户角度描述这个功能
+      placeholder: |
+        作为一个 [用户类型]，
+        我想要 [功能]，
+        这样我就可以 [好处/价值]。
+      value: |
+        作为一个 ______，
+        我想要 ______，
+        这样我就可以 ______。
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 设计稿/原型
+      description: 如果您有任何设计想法，请分享
+      placeholder: 拖拽图片到这里或描述您的设计想法...
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: 🔧 技术细节
+      description: 如果您有技术实现的想法，请分享
+      placeholder: 这个功能可能需要...
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: 🛠️ 实现意愿
+      description: 您是否愿意帮助实现这个功能？
+      options:
+        - label: 我愿意帮助设计这个功能
+        - label: 我愿意帮助实现这个功能
+        - label: 我愿意帮助测试这个功能
+        - label: 我愿意帮助编写文档
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 附加信息
+      description: 添加任何其他相关的信息
+      placeholder: 任何其他想法、链接或参考资料...
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 📋 最终确认
+      description: 在提交前请确认
+      options:
+        - label: 我已经提供了清晰的功能描述
+          required: true
+        - label: 我理解这个功能请求将被团队评估
+          required: true

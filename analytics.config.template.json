@@ -1,0 +1,67 @@
+{
+  "_README": "Google Analytics 4 配置指南",
+  "_setup_instructions": "请阅读 docs/GA4_DATASTREAM_SETUP_GUIDE.md 获取详细设置说明",
+  "_important": "对于 Electron 应用，请在 GA4 中选择'网站'数据流类型",
+
+  "analytics": {
+    "enabled": false,
+    "_enabled_note": "设置完成后将此值改为 true",
+
+    "measurementId": "G-XXXXXXXXXX",
+    "_measurementId_note": "替换为您在 GA4 数据流中获取的真实 Measurement ID",
+
+    "apiSecret": "YOUR_API_SECRET_HERE",
+    "_apiSecret_note": "在 Google Cloud Console 中创建的 API 密钥",
+
+    "datastream_setup": {
+      "_type": "website",
+      "_type_note": "虽然是桌面应用，但应选择'网站'数据流",
+      "website_url": "https://wxdown.electron.app",
+      "_website_url_note": "可以使用应用标识符或 localhost 作为域名",
+      "datastream_name": "爱下桌面应用"
+    },
+
+    "events": {
+      "app_lifecycle": {
+        "app_start": true,
+        "app_ready": true,
+        "app_quit": true
+      },
+      "user_actions": {
+        "button_click": true,
+        "menu_select": true,
+        "feature_usage": true,
+        "video_download": true,
+        "proxy_toggle": true
+      },
+      "performance": {
+        "startup_time": true,
+        "memory_usage": false,
+        "download_speed": true,
+        "response_time": true
+      },
+      "errors": {
+        "app_errors": true,
+        "download_errors": true,
+        "network_errors": true,
+        "proxy_errors": true
+      }
+    },
+
+    "custom_dimensions": {
+      "_note": "在 GA4 管理界面中设置这些自定义维度",
+      "app_version": "app_version",
+      "os_name": "os_name",
+      "download_type": "download_type",
+      "proxy_status": "proxy_enabled"
+    },
+
+    "privacy": {
+      "anonymize_ip": true,
+      "respect_dnt": true,
+      "gdpr_compliance": true,
+      "data_retention_days": 90,
+      "consent_required": true
+    }
+  }
+}

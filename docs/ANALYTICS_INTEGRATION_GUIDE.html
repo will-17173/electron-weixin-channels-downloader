@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron Google Analytics 集成演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 4px solid #007acc;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .feature-title {
+            color: #007acc;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .integration-steps {
+            counter-reset: step-counter;
+        }
+        .step {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+        }
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            background: #007acc;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 6px;
+            border-radius: 3px;
+            border: 1px solid #ffeaa7;
+        }
+        .warning {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+        .api-example {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 8px 0;
+        }
+        .toc a {
+            color: #007acc;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Electron Google Analytics 集成完整指南</h1>
+        <p>在Electron应用中集成Google Analytics 4的完整解决方案</p>
+    </div>
+
+    <div class="toc">
+        <h2>📋 目录</h2>
+        <ul>
+            <li><a href="#overview">1. 概述</a></li>
+            <li><a href="#setup">2. 设置Google Analytics</a></li>
+            <li><a href="#implementation">3. 实现方案</a></li>
+            <li><a href="#usage">4. 使用示例</a></li>
+            <li><a href="#privacy">5. 隐私保护</a></li>
+            <li><a href="#testing">6. 测试和调试</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="overview">
+        <h2>🔍 1. 概述</h2>
+        <p>Electron应用可以通过Google Analytics 4的Measurement Protocol API收集用户使用数据。这种方案具有以下优势：</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-title">🎯 精确跟踪</div>
+                <p>跟踪应用启动、功能使用、错误信息等关键指标</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">🔒 隐私保护</div>
+                <p>完全符合GDPR规范，用户可选择是否同意数据收集</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">⚡ 高性能</div>
+                <p>异步发送，不影响应用性能</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">📈 实时分析</div>
+                <p>在Google Analytics控制台实时查看用户行为数据</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="setup">
+        <h2>⚙️ 2. 设置Google Analytics</h2>
+
+        <div class="integration-steps">
+            <div class="step">
+                <h3>创建GA4属性</h3>
+                <p>在<a href="https://analytics.google.com" target="_blank">Google Analytics</a>中创建新的GA4属性</p>
+                <div class="code-block">
+# 获取以下信息：
+Measurement ID: G-XXXXXXXXXX
+API Secret: 通过Admin > Data Streams > Stream Details > Measurement Protocol API secrets创建</div>
+            </div>
+
+            <div class="step">
+                <h3>安装依赖</h3>
+                <div class="code-block">npm install uuid</div>
+            </div>
+
+            <div class="step">
+                <h3>创建Analytics模块</h3>
+                <p>创建专门的Analytics管理类处理所有统计功能</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="implementation">
+        <h2>🛠️ 3. 实现方案</h2>
+
+        <h3>主进程 (Main Process)</h3>
+        <div class="code-block">
+// src/main/analytics.js
+import https from 'https'
+import { v4 as uuidv4 } from 'uuid'
+
+class AnalyticsManager {
+  constructor() {
+    this.measurementId = 'G-XXXXXXXXXX'
+    this.apiSecret = 'XXXXXXXXXXXXXXXXXXX'
+    this.clientId = uuidv4()
+    this.sessionId = this.generateSessionId()
+  }
+
+  async trackEvent(eventName, parameters = {}) {
+    const payload = {
+      client_id: this.clientId,
+      events: [{
+        name: eventName,
+        params: {
+          session_id: this.sessionId,
+          app_version: this.getAppVersion(),
+          platform: process.platform,
+          ...parameters
+        }
+      }]
+    }
+
+    await this.sendToGA4(payload)
+  }
+}
+        </div>
+
+        <h3>渲染进程 (Renderer Process)</h3>
+        <div class="code-block">
+// src/renderer/src/composables/useAnalytics.js
+export function useAnalytics() {
+  const trackEvent = async (eventName, parameters) => {
+    await window.api.analytics.trackEvent(eventName, parameters)
+  }
+
+  const trackFeature = async (featureName, action) => {
+    await trackEvent('feature_usage', {
+      feature_name: featureName,
+      action: action
+    })
+  }
+
+  return { trackEvent, trackFeature }
+}
+        </div>
+
+        <h3>IPC通信桥梁</h3>
+        <div class="code-block">
+// src/preload/index.js
+const api = {
+  analytics: {
+    trackEvent: (eventName, parameters) =>
+      ipcRenderer.invoke('analytics-track-event', eventName, parameters),
+    trackPage: (pageName, customParams) =>
+      ipcRenderer.invoke('analytics-track-page', pageName, customParams),
+    setConsent: (consent) =>
+      ipcRenderer.invoke('analytics-set-consent', consent)
+  }
+}
+        </div>
+    </div>
+
+    <div class="section" id="usage">
+        <h2>📖 4. 使用示例</h2>
+
+        <h3>基础事件跟踪</h3>
+        <div class="api-example">
+            <strong>应用启动：</strong>
+            <div class="code-block">analytics.trackEvent('app_start', {
+  platform: process.platform,
+  electron_version: process.versions.electron
+})</div>
+        </div>
+
+        <div class="api-example">
+            <strong>功能使用：</strong>
+            <div class="code-block">analytics.trackFeature('video_download', 'download_start')
+analytics.trackFeature('proxy_control', 'start_proxy')</div>
+        </div>
+
+        <div class="api-example">
+            <strong>错误跟踪：</strong>
+            <div class="code-block">analytics.trackError('Download failed: Network error', 'video_download')</div>
+        </div>
+
+        <div class="api-example">
+            <strong>性能指标：</strong>
+            <div class="code-block">analytics.trackPerformance('app_startup_time', 2500, 'ms')</div>
+        </div>
+
+        <h3>Vue组件中的使用</h3>
+        <div class="code-block">
+&lt;script setup&gt;
+import { useAnalytics } from './composables/useAnalytics.js'
+
+const analytics = useAnalytics()
+
+const downloadVideo = async () => {
+  analytics.trackFeature('video_download', 'start')
+
+  try {
+    const result = await window.api.downloadVideo(videoData)
+    analytics.trackEvent('download_success', {
+      file_size: videoData.size
+    })
+  } catch (error) {
+    analytics.trackError(error, 'video_download')
+  }
+}
+&lt;/script&gt;
+        </div>
+    </div>
+
+    <div class="section" id="privacy">
+        <h2>🔒 5. 隐私保护</h2>
+
+        <div class="success">
+            <strong>✅ GDPR合规性</strong><br>
+            我们的实现完全符合GDPR和其他隐私法规要求
+        </div>
+
+        <h3>用户同意机制</h3>
+        <div class="code-block">
+// 请求用户同意
+const requestConsent = async () => {
+  // 显示同意对话框
+  const consent = await showConsentDialog()
+  await analytics.saveUserConsent(consent)
+
+  if (consent) {
+    await analytics.initialize()
+  }
+}
+        </div>
+
+        <h3>数据收集原则</h3>
+        <ul>
+            <li>🚫 <strong>不收集个人信息</strong>：不收集用户姓名、邮箱等个人身份信息</li>
+            <li>🎭 <strong>匿名化处理</strong>：所有数据都是匿名的，使用随机UUID作为用户标识</li>
+            <li>🎯 <strong>必要性原则</strong>：只收集产品改进必需的数据</li>
+            <li>🔄 <strong>可撤销同意</strong>：用户可以随时撤销数据收集同意</li>
+        </ul>
+
+        <div class="warning">
+            <strong>⚠️ 重要提醒</strong><br>
+            在生产环境中使用前，请确保：<br>
+            1. 替换示例中的Measurement ID和API Secret<br>
+            2. 在应用设置中提供隐私政策链接<br>
+            3. 为用户提供禁用统计的选项
+        </div>
+    </div>
+
+    <div class="section" id="testing">
+        <h2>🧪 6. 测试和调试</h2>
+
+        <h3>本地测试</h3>
+        <div class="code-block">
+// 启用调试模式
+const analytics = new AnalyticsManager()
+await analytics.initialize({
+  measurementId: 'G-XXXXXXXXXX',
+  apiSecret: 'XXXXXXXXXXXXXXXXXXX',
+  debug: true
+})
+
+// 发送测试事件
+analytics.trackEvent('test_event', {
+  test_parameter: 'test_value'
+})
+        </div>
+
+        <h3>验证数据发送</h3>
+        <p>在Google Analytics控制台中：</p>
+        <ol>
+            <li>进入 <code>Configure > DebugView</code></li>
+            <li>启用调试模式后可以实时查看事件</li>
+            <li>检查 <code>Reports > Realtime</code> 查看实时数据</li>
+        </ol>
+
+        <h3>常见问题排查</h3>
+        <div class="api-example">
+            <strong>数据不显示：</strong>
+            <ul>
+                <li>检查Measurement ID和API Secret是否正确</li>
+                <li>确认网络连接正常</li>
+                <li>查看控制台是否有错误信息</li>
+            </ul>
+        </div>
+
+        <div class="api-example">
+            <strong>调试技巧：</strong>
+            <div class="code-block">
+// 添加详细日志
+console.log('Sending analytics event:', eventName, parameters)
+
+// 验证payload格式
+console.log('Analytics payload:', JSON.stringify(payload, null, 2))
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎉 总结</h2>
+        <p>通过本指南，您已经学会了如何在Electron应用中完整集成Google Analytics 4。这个解决方案具有以下特点：</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-title">🚀 易于集成</div>
+                <p>模块化设计，可以轻松集成到现有项目中</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">🔧 高度可定制</div>
+                <p>支持自定义事件、参数和用户属性</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">📊 数据丰富</div>
+                <p>收集应用使用、性能、错误等多维度数据</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-title">🛡️ 隐私优先</div>
+                <p>完全符合隐私法规，用户数据安全有保障</p>
+            </div>
+        </div>
+
+        <div class="success">
+            <strong>🎯 下一步行动</strong><br>
+            1. 创建您的GA4属性并获取凭据<br>
+            2. 将代码集成到您的Electron应用中<br>
+            3. 测试和验证数据收集<br>
+            4. 在GA4控制台中分析用户行为数据
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #666;">
+        <p>📧 如有问题，请参考 <a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4" target="_blank">Google Analytics Measurement Protocol 文档</a></p>
+    </footer>
+</body>
+</html>

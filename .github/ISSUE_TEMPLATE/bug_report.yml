@@ -1,0 +1,138 @@
+name: 🐛 Bug Report
+description: 报告一个错误或问题
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您抽出时间填写此错误报告！ 🙏
+
+        在提交前，请确保：
+        - [ ] 搜索了现有的issues，避免重复提交
+        - [ ] 使用的是最新版本
+        - [ ] 提供了足够的信息来复现问题
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认检查
+      description: 请确认您已经完成以下检查
+      options:
+        - label: 我已经搜索了现有的issues
+          required: true
+        - label: 我使用的是最新版本
+          required: true
+        - label: 我已经查看了文档和FAQ
+          required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🐛 错误描述
+      description: 清楚简洁地描述这个错误
+      placeholder: 详细描述您遇到的问题...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 🔄 复现步骤
+      description: 如何复现这个错误？
+      placeholder: |
+        1. 打开应用
+        2. 点击 '...'
+        3. 滚动到 '...'
+        4. 看到错误
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 🎯 预期行为
+      description: 描述您预期应该发生的情况
+      placeholder: 应该发生什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 💥 实际行为
+      description: 描述实际发生的情况
+      placeholder: 实际发生了什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 截图
+      description: 如果适用，请添加截图来帮助解释问题
+      placeholder: 拖拽图片到这里...
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: 💻 操作系统
+      description: 您使用的操作系统
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS Ventura (13.x)
+        - macOS Monterey (12.x)
+        - macOS Big Sur (11.x)
+        - Ubuntu 22.04
+        - Ubuntu 20.04
+        - Other Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: 📱 应用版本
+      description: 您使用的应用版本 (可在关于页面查看)
+      placeholder: v1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: 🟢 Node.js版本 (如果从源码运行)
+      description: 输出 `node --version`
+      placeholder: v18.17.0
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: 📋 错误日志
+      description: 如果有错误日志，请粘贴到这里
+      render: shell
+      placeholder: 粘贴错误日志...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 附加信息
+      description: 添加任何其他有助于解决问题的信息
+      placeholder: 任何其他相关信息...
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 📋 最终检查
+      description: 在提交前请确认
+      options:
+        - label: 我已经提供了足够详细的信息
+          required: true
+        - label: 我理解这是一个开源项目，由志愿者维护
+          required: true

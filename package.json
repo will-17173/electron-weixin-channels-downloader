@@ -1,0 +1,60 @@
+{
+  "name": "electron-wechat-channels-downloader",
+  "version": "1.0.0",
+  "description": "爱下 - 微信视频号下载工具",
+  "keywords": [
+    "electron",
+    "wechat",
+    "channels",
+    "downloader",
+    "wxdown"
+  ],
+  "main": "./out/main/index.js",
+  "author": "Will.H",
+  "homepage": "https://www.wxdown.xyz",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint --cache .",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux",
+    "build:all": "npm run build && electron-builder --win --mac --linux",
+    "obfuscate": "node scripts/obfuscate.js",
+    "release": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1",
+    "release:major": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Major",
+    "release:minor": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Minor",
+    "release:patch": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Patch",
+    "release:pre": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -PreRelease",
+    "release:win": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Platform win",
+    "clean": "Remove-Item -Path dist,out -Recurse -Force -ErrorAction SilentlyContinue",
+    "test": "echo \"Warning: no test specified\" && exit 0",
+    "test:unit": "echo \"Warning: no unit tests specified\" && exit 0",
+    "test:integration": "echo \"Warning: no integration tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "electron-updater": "^6.6.2",
+    "gtag": "^1.0.1",
+    "http-mitm-proxy": "^1.1.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^2.1.0",
+    "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "electron": "^34.5.8",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^3.1.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-vue": "^9.33.0",
+    "prettier": "^3.5.3",
+    "vite": "^6.3.5",
+    "vue": "^3.5.16"
+  }
+}
