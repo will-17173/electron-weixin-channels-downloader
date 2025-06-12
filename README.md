@@ -1,7 +1,7 @@
 <div align="center">
   <img src="build/icon.png" alt="爱下 Logo" width="120" height="120">
 
-  # 爱下 - 微信视频下载器
+  # 爱下 - 微信视频号下载器
 
   <p>
     <strong>一款专业的微信视频号内容下载工具</strong>
@@ -81,7 +81,6 @@
 |------|----------|----------|----------|
 | Windows | Windows 10 | Windows 11 | 需要管理员权限安装证书 |
 | macOS | macOS 10.15 | macOS 12+ | 需要信任开发者证书 |
-| Linux | Ubuntu 18.04 | Ubuntu 22.04+ | 需要安装额外依赖包 |
 
 ### 💿 环境要求
 
@@ -96,24 +95,6 @@
 
 从 [Releases](https://github.com/wxdown-team/wxdown-wechat-video-downloader/releases) 页面下载适合您系统的安装包：
 
-#### Windows
-```
-wxdown-setup-1.0.0.exe      # 安装版 (推荐)
-wxdown-1.0.0-portable.exe   # 便携版
-```
-
-#### macOS
-```
-wxdown-1.0.0.dmg           # Intel 芯片
-wxdown-1.0.0-arm64.dmg     # Apple Silicon
-```
-
-#### Linux
-```
-wxdown-1.0.0.AppImage      # 通用格式
-wxdown_1.0.0_amd64.deb     # Debian/Ubuntu
-wxdown-1.0.0.x86_64.rpm    # Red Hat/CentOS
-```
 
 ### 🛠️ 从源码构建
 
@@ -165,7 +146,6 @@ npm run build:all
 - 下载对应平台的安装包
 - **Windows**: 以管理员身份运行安装程序
 - **macOS**: 拖拽到应用程序文件夹，首次运行需要信任
-- **Linux**: 根据发行版使用对应的包管理器安装
 
 #### 2. 证书配置
 首次启动时，应用会自动引导您完成证书安装：
@@ -188,7 +168,7 @@ npm run build:all
 
 #### 监控视频
 1. **启动监控**: 确保代理服务已启动
-2. **访问微信**: 在微信客户端或网页版访问视频号
+2. **访问微信**: 在微信客户端访问视频号
 3. **自动捕获**: 应用会自动捕获并显示视频信息
 4. **实时更新**: 视频列表实时更新，显示最新捕获内容
 
@@ -196,44 +176,8 @@ npm run build:all
 1. **选择视频**: 在视频列表中选择要下载的内容
 2. **批量操作**: 可同时选择多个视频进行批量下载
 3. **监控进度**: 实时查看下载进度、速度和剩余时间
-4. **文件管理**: 下载完成后可直接打开文件所在位置
+4. **文件管理**: 下载完成后可直接打开文件所在位置（本机下载目录/WechatVideos）
 
-#### 高级功能
-- **过滤筛选**: 根据视频标题、时长、大小等条件筛选
-- **下载设置**: 自定义下载路径、文件命名规则
-- **代理配置**: 调整代理端口、请求超时等参数
-- **日志查看**: 查看详细的操作日志和错误信息
-
-## 🔧 配置说明
-
-### 📁 配置文件位置
-
-| 平台 | 配置路径 |
-|------|----------|
-| Windows | `%APPDATA%\wxdown\` |
-| macOS | `~/Library/Application Support/wxdown/` |
-| Linux | `~/.config/wxdown/` |
-
-### ⚙️ 主要配置项
-
-```json
-{
-  "proxy": {
-    "port": 57392,
-    "timeout": 30000,
-    "maxConcurrent": 5
-  },
-  "download": {
-    "path": "./downloads",
-    "maxRetries": 3,
-    "chunkSize": 1048576
-  },
-  "ui": {
-    "theme": "auto",
-    "language": "zh-CN"
-  }
-}
-```
 
 ## 🐛 常见问题
 
@@ -302,7 +246,7 @@ A: 1. 重新下载该视频文件
 ### 🏗️ 项目结构
 
 ```
-wxdown-wechat-video-downloader/
+electron-wexin-channels-downloader/
 ├── 📁 build/                  # 构建资源
 │   ├── icon.ico              # Windows图标
 │   ├── icon.icns             # macOS图标
@@ -351,57 +295,18 @@ wxdown-wechat-video-downloader/
 
 3. **安装依赖**
    ```bash
-   pnpm install
+   npm install
    ```
 
 4. **启动开发服务**
    ```bash
-   pnpm dev
+   npm dev
    ```
 
 5. **代码规范**
    ```bash
-   pnpm lint    # ESLint检查
-   pnpm format  # Prettier格式化
-   ```
-
-### 🧪 测试指南
-
-```bash
-# 运行完整测试套件
-./test-complete.sh    # Linux/macOS
-.\test-complete.bat   # Windows
-
-# 单元测试
-npm test
-
-# E2E测试
-npm run test:e2e
-```
-
-### 📦 发布流程
-
-1. **更新版本号**
-   ```bash
-   npm version patch  # 补丁版本
-   npm version minor  # 次要版本
-   npm version major  # 主要版本
-   ```
-
-2. **构建所有平台**
-   ```bash
-   npm run build:all
-   ```
-
-3. **创建发布包**
-   ```bash
-   npm run release
-   ```
-
-4. **发布到GitHub**
-   ```bash
-   git push --tags
-   # 在GitHub上创建Release并上传构建产物
+   npm lint    # ESLint检查
+   npm format  # Prettier格式化
    ```
 
 ## 🤝 贡献指南
@@ -437,17 +342,12 @@ npm run test:e2e
    pnpm format
    ```
 
-3. **编写测试**确保功能正常
-   ```bash
-   npm test
-   ```
-
-4. **提交更改**使用规范的提交信息
+3. **提交更改**使用规范的提交信息
    ```bash
    git commit -m "feat: add amazing feature"
    ```
 
-5. **创建Pull Request**并详细描述更改内容
+4. **创建Pull Request**并详细描述更改内容
 
 ### 📝 提交规范
 
@@ -496,7 +396,7 @@ copies or substantial portions of the Software.
 
 ## 💰 支持我们
 
-如果这个项目对您有帮助，欢迎打赏支持我们的开发工作！您的支持是我们持续改进的动力。
+如果这个项目对您有帮助，欢迎打赏支持我的开发工作！您的支持是我持续改进的动力。
 
 <div align="center">
   <table>
@@ -517,7 +417,7 @@ copies or substantial portions of the Software.
 
 <div align="center">
   <p>
-    <sub>🙏 您的每一份支持都是我们前进的动力！</sub>
+    <sub>🙏 您的每一份支持都是我前进的动力！</sub>
   </p>
 </div>
 
@@ -526,7 +426,7 @@ copies or substantial portions of the Software.
 - 🌐 **官方网站**: https://www.wxdown.xyz
 - 🐛 **问题反馈**: [GitHub Issues](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues)
 - 💬 **讨论交流**: [GitHub Discussions](https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions)
-- 📧 **邮件联系**: support@wxdown.xyz
+- 📧 **邮件联系**: huangzhaojian@gmail.com
 
 ---
 
@@ -535,7 +435,7 @@ copies or substantial portions of the Software.
     <strong>⭐ 如果这个项目对您有帮助，请给我们一个星星！</strong>
   </p>
   <p>
-    <sub>Built with ❤️ by <a href="https://www.wxdown.xyz">WxDown Team</a></sub>
+    <sub>Built with ❤️ by <a href="https://www.wxdown.xyz">Will.H</a></sub>
   </p>
 </div>
 
