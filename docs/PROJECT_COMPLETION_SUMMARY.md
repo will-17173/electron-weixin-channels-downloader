@@ -79,7 +79,7 @@ Topics: electron, vue, wechat, video-downloader, desktop-app
 
 ### 第2步: 上传代码 (10分钟)
 ```bash
-git remote add origin https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
+git remote add origin https://github.com/will-17173/electron-weixin-channels-downloader.git
 git branch -M main
 git push -u origin main
 git tag v1.0.0-pre
@@ -158,7 +158,7 @@ git push origin --tags
 
 ### 🌐 相关链接
 - **官方网站**: https://www.wxdown.xyz
-- **建议仓库**: https://github.com/wxdown-team/wxdown-wechat-video-downloader
+- **建议仓库**: https://github.com/will-17173/electron-weixin-channels-downloader
 - **支持邮箱**: support@wxdown.xyz
 
 ---

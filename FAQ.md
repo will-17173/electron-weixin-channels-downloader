@@ -19,15 +19,15 @@
 **A:** 我们提供多种安装方式：
 
 1. **预编译版本**（推荐）：
-   - 从 [Releases](https://github.com/wxdown-team/wxdown-wechat-video-downloader/releases) 下载
+   - 从 [Releases](https://github.com/will-17173/electron-weixin-channels-downloader/releases) 下载
    - Windows: 双击 `.exe` 文件安装
    - macOS: 拖拽 `.app` 到应用程序文件夹
    - Linux: 运行 `.AppImage` 或安装 `.deb`/`.rpm` 包
 
 2. **从源码构建**：
    ```bash
-   git clone https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
-   cd wxdown-wechat-video-downloader
+   git clone https://github.com/will-17173/electron-weixin-channels-downloader.git
+   cd electron-weixin-channels-downloader
    npm install
    npm run dev
    ```
@@ -279,9 +279,9 @@
 
 如果您的问题没有在这里找到答案：
 
-1. **搜索已有问题**：[GitHub Issues](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues)
-2. **提交新问题**：[创建Issue](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues/new)
-3. **社区讨论**：[GitHub Discussions](https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions)
+1. **搜索已有问题**：[GitHub Issues](https://github.com/will-17173/electron-weixin-channels-downloader/issues)
+2. **提交新问题**：[创建Issue](https://github.com/will-17173/electron-weixin-channels-downloader/issues/new)
+3. **社区讨论**：[GitHub Discussions](https://github.com/will-17173/electron-weixin-channels-downloader/discussions)
 4. **官方网站**：https://www.wxdown.xyz
 5. **邮件联系**：support@wxdown.xyz
 

@@ -27,7 +27,7 @@ git clone https://github.com/YOUR_USERNAME/wxdown-wechat-video-downloader.git
 cd wxdown-wechat-video-downloader
 
 # 添加上游仓库
-git remote add upstream https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
+git remote add upstream https://github.com/will-17173/electron-weixin-channels-downloader.git
 ```
 
 ### 安装依赖
@@ -321,8 +321,8 @@ describe('MyComponent', () => {
 如果您在贡献过程中遇到问题：
 
 - 📧 发送邮件到：dev@wxdown.xyz
-- 💬 在 [GitHub Discussions](https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions) 中提问
-- 🐛 在 [GitHub Issues](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues) 中报告问题
+- 💬 在 [GitHub Discussions](https://github.com/will-17173/electron-weixin-channels-downloader/discussions) 中提问
+- 🐛 在 [GitHub Issues](https://github.com/will-17173/electron-weixin-channels-downloader/issues) 中报告问题
 
 ## 🙏 致谢
 

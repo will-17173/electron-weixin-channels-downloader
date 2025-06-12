@@ -222,8 +222,8 @@
 <div align="center">
   <p>
     <strong>📋 有问题或建议？</strong><br>
-    <a href="https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues">提交Issue</a> |
-    <a href="https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions">参与讨论</a>
+    <a href="https://github.com/will-17173/electron-weixin-channels-downloader/issues">提交Issue</a> |
+    <a href="https://github.com/will-17173/electron-weixin-channels-downloader/discussions">参与讨论</a>
   </p>
   <p>
     <sub>由 WxDown 团队用 ❤️ 制作</sub>

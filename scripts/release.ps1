@@ -309,8 +309,8 @@ function New-ReleaseNotes {
 ## 📞 技术支持
 
 - 🌐 **官方网站**: https://www.wxdown.xyz
-- 🐛 **问题反馈**: [GitHub Issues](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues)
-- 💬 **社区讨论**: [GitHub Discussions](https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions)
+- 🐛 **问题反馈**: [GitHub Issues](https://github.com/will-17173/electron-weixin-channels-downloader/issues)
+- 💬 **社区讨论**: [GitHub Discussions](https://github.com/will-17173/electron-weixin-channels-downloader/discussions)
 - 📧 **邮件支持**: support@wxdown.xyz
 
 ---
@@ -381,7 +381,7 @@ function Main {
         Write-Host "  3. 在GitHub上创建Release并上传构建产物"
         Write-Host "  4. 使用生成的发布说明: $releaseNotesFile"
         Write-Host ""
-        Write-ColorOutput "🌐 项目主页: https://github.com/wxdown-team/wxdown-wechat-video-downloader" "Cyan"
+        Write-ColorOutput "🌐 项目主页: https://github.com/will-17173/electron-weixin-channels-downloader" "Cyan"
     }
 }
 

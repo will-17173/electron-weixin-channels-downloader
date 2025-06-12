@@ -20,7 +20,7 @@
 ### 2. GitHub仓库信息
 - **推荐仓库名**: `wxdown-wechat-video-downloader`
 - **推荐组织名**: `wxdown-team`
-- **完整仓库URL**: `https://github.com/wxdown-team/wxdown-wechat-video-downloader`
+- **完整仓库URL**: `https://github.com/will-17173/electron-weixin-channels-downloader`
 
 ### 3. 文件命名规范
 所有构建产物已更新为新的命名规范：
@@ -68,7 +68,7 @@
 # 组织: wxdown-team (或个人账户)
 
 # 本地设置远程仓库
-git remote add origin https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
+git remote add origin https://github.com/will-17173/electron-weixin-channels-downloader.git
 git branch -M main
 git push -u origin main
 ```

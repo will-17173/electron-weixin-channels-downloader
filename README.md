@@ -10,9 +10,9 @@
   <p>
     <img alt="Platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey">
     <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
-    <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue">
+    <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-blue">
     <img alt="Website" src="https://img.shields.io/badge/website-wxdown.xyz-blue">
-    <img alt="Stars" src="https://img.shields.io/github/stars/wxdown-team/wxdown-wechat-video-downloader?style=social">
+    <img alt="Stars" src="https://img.shields.io/github/stars/will-17173/electron-weixin-channels-downloader?style=social">
   </p>
 
   <p>
@@ -93,15 +93,15 @@
 
 ### 🎁 预编译版本 (推荐)
 
-从 [Releases](https://github.com/wxdown-team/wxdown-wechat-video-downloader/releases) 页面下载适合您系统的安装包：
+从 [Releases](https://github.com/will-17173/electron-weixin-channels-downloader/releases) 页面下载适合您系统的安装包：
 
 
 ### 🛠️ 从源码构建
 
 #### 1. 克隆仓库
 ```bash
-git clone https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
-cd wxdown-wechat-video-downloader
+git clone https://github.com/will-17173/electron-weixin-channels-downloader.git
+cd electron-weixin-channels-downloader
 ```
 
 #### 2. 安装依赖
@@ -289,8 +289,8 @@ electron-wexin-channels-downloader/
 
 2. **克隆项目**
    ```bash
-   git clone https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
-   cd wxdown-wechat-video-downloader
+   git clone https://github.com/will-17173/electron-weixin-channels-downloader.git
+   cd electron-weixin-channels-downloader
    ```
 
 3. **安装依赖**
@@ -424,8 +424,8 @@ copies or substantial portions of the Software.
 ## 📞 联系我们
 
 - 🌐 **官方网站**: https://www.wxdown.xyz
-- 🐛 **问题反馈**: [GitHub Issues](https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues)
-- 💬 **讨论交流**: [GitHub Discussions](https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions)
+- 🐛 **问题反馈**: [GitHub Issues](https://github.com/will-17173/electron-weixin-channels-downloader/issues)
+- 💬 **讨论交流**: [GitHub Discussions](https://github.com/will-17173/electron-weixin-channels-downloader/discussions)
 - 📧 **邮件联系**: huangzhaojian@gmail.com
 
 ---

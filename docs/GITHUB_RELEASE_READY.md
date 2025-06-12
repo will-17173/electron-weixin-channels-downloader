@@ -58,7 +58,7 @@
 git init
 
 # 添加远程仓库
-git remote add origin https://github.com/wxdown-team/wxdown-wechat-video-downloader.git
+git remote add origin https://github.com/will-17173/electron-weixin-channels-downloader.git
 
 # 添加所有文件
 git add .

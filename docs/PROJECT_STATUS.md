@@ -208,9 +208,9 @@ Prettier         - 代码格式化
 ## 📞 联系信息
 
 - **官方网站**: https://www.wxdown.xyz
-- **项目主页**: https://github.com/wxdown-team/wxdown-wechat-video-downloader
-- **问题报告**: https://github.com/wxdown-team/wxdown-wechat-video-downloader/issues
-- **功能建议**: https://github.com/wxdown-team/wxdown-wechat-video-downloader/discussions
+- **项目主页**: https://github.com/will-17173/electron-weixin-channels-downloader
+- **问题报告**: https://github.com/will-17173/electron-weixin-channels-downloader/issues
+- **功能建议**: https://github.com/will-17173/electron-weixin-channels-downloader/discussions
 - **技术支持**: support@wxdown.xyz
 
 ---
