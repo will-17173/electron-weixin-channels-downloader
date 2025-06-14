@@ -1,6 +1,6 @@
 {
   "name": "electron-weixin-channels-downloader",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "爱下 - 微信视频号下载工具",
   "keywords": [
     "electron",
@@ -21,20 +21,9 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux",
-    "build:all": "npm run build && electron-builder --win --mac --linux",
     "obfuscate": "node scripts/obfuscate.js",
     "release": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1",
-    "release:major": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Major",
-    "release:minor": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Minor",
-    "release:patch": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Patch",
-    "release:pre": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -PreRelease",
-    "release:win": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1 -Platform win",
-    "clean": "Remove-Item -Path dist,out -Recurse -Force -ErrorAction SilentlyContinue",
-    "test": "echo \"Warning: no test specified\" && exit 0",
-    "test:unit": "echo \"Warning: no unit tests specified\" && exit 0",
-    "test:integration": "echo \"Warning: no integration tests specified\" && exit 0"
+    "clean": "Remove-Item -Path dist,out -Recurse -Force -ErrorAction SilentlyContinue"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",

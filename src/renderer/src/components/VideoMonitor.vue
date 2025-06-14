@@ -12,6 +12,9 @@
             🔄 刷新状态
           </button>
           <button class="action-btn clear-btn" @click="clearVideoData">🗑️ 清空数据</button>
+          <button class="action-btn folder-btn" @click="openDownloadFolder">
+            📂 打开下载文件夹
+          </button>
         </div>
       </div>
 
@@ -100,7 +103,7 @@ const cancelDownload = (video) => {
   emit('cancel-download', video)
 }
 
-const openDownloadFolder = (video) => {
+const openDownloadFolder = (video = null) => {
   emit('open-folder', video)
 }
 </script>
@@ -190,6 +193,15 @@ const openDownloadFolder = (video) => {
 
 .video-list-actions .clear-btn:hover {
   background: #dc2626;
+}
+
+.video-list-actions .folder-btn {
+  background: #10b981;
+  color: white;
+}
+
+.video-list-actions .folder-btn:hover {
+  background: #059669;
 }
 
 .video-list-actions .action-btn:active {
