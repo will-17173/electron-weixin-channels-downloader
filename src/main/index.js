@@ -1125,6 +1125,16 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('export-certificate', async () => {
+    const result = await certManager.exportCertificate()
+    mainWindow.webContents.send('export-certificate-reply', result)
+  })
+
+  // Proxy-related IPC handlers
+  ipcMain.handle('check-proxy', async () => {
+    // ... existing code ...
+  })
+
   createWindow()
 
   app.on('activate', function () {

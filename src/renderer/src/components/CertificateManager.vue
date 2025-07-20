@@ -23,6 +23,14 @@
 
       <button
         class="btn-secondary"
+        :disabled="certificateStatus.loading || !certificateStatus.exists"
+        @click="$emit('export-certificate')"
+      >
+        📤 导出证书
+      </button>
+
+      <button
+        class="btn-secondary"
         :disabled="certificateStatus.loading || !certificateStatus.installed"
         @click="$emit('uninstall-certificate')"
       >
@@ -88,7 +96,12 @@ defineProps({
 })
 
 // Emits
-defineEmits(['check-certificate', 'install-certificate', 'uninstall-certificate'])
+defineEmits([
+  'check-certificate',
+  'install-certificate',
+  'uninstall-certificate',
+  'export-certificate'
+])
 </script>
 
 <style scoped>

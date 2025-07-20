@@ -102,6 +102,10 @@ class CertificateManager {
     return await this._manager.uninstallCertificate()
   }
 
+  async exportCertificate() {
+    return await this._manager.exportCertificate()
+  }
+
   async autoManageCertificate() {
     return await this._manager.autoManageCertificate()
   }

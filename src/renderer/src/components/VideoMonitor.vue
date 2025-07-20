@@ -1,24 +1,26 @@
 <template>
   <div class="video-monitor-section">
     <h2>🎥 爱下 - 视频号下载器</h2>
+    <div class="monitor-status">
+      <span :class="['status-light', { 'is-monitoring': isMonitoring }]"></span>
+      <span v-if="isMonitoring">监控中 (端口: {{ serverPort }})</span>
+      <span v-else>监控已停止</span>
+    </div>
 
     <!-- 视频列表 -->
     <div class="video-list-container">
       <!-- 视频列表标题和操作按钮 -->
       <div class="video-list-header">
-        <h3>📋 视频列表 ({{ videoMonitorStatus.totalCapturedCount }} 个)</h3>
+        <h3>📋 视频列表 ({{ capturedVideos.length }} 个)</h3>
         <div class="video-list-actions">
-          <button class="action-btn refresh-btn" @click="refreshVideoMonitorStatus">
+          <button class="action-btn refresh-btn" @click="$emit('refresh')">
             🔄 刷新状态
           </button>
-          <button class="action-btn clear-btn" @click="clearVideoData">🗑️ 清空数据</button>
-          <button class="action-btn folder-btn" @click="openDownloadFolder">
-            📂 打开下载文件夹
-          </button>
+          <button class="action-btn clear-btn" @click="$emit('clear-videos')">🗑️ 清空数据</button>
         </div>
       </div>
 
-      <div v-if="videoMonitorStatus.videos.length === 0" class="no-videos">
+      <div v-if="capturedVideos.length === 0" class="no-videos">
         <div class="no-videos-content">
           <div class="no-videos-icon">📱</div>
           <h4>暂无捕获的视频</h4>
@@ -37,18 +39,17 @@
 
       <div v-else class="video-list">
         <VideoItem
-          v-for="(video, index) in displayedVideos"
+          v-for="(video, index) in capturedVideos"
           :key="video.id || index"
           :video="video"
           :index="index"
-          @download="downloadVideo"
-          @cancel-download="cancelDownload"
-          @open-folder="openDownloadFolder"
+          @download="(video) => $emit('download-video', video)"
+          @cancel-download="(videoId) => $emit('cancel-download', videoId)"
         />
 
         <!-- 显示更多视频的提示 -->
-        <div v-if="videoMonitorStatus.videos.length > displayLimit" class="more-videos-notice">
-          <p>📋 还有 {{ videoMonitorStatus.videos.length - displayLimit }} 个视频未显示</p>
+        <div v-if="capturedVideos.length > displayLimit" class="more-videos-notice">
+          <p>📋 还有 {{ capturedVideos.length - displayLimit }} 个视频未显示</p>
           <p class="tip">💡 点击"导出JSON"查看完整列表</p>
         </div>
       </div>
@@ -61,10 +62,18 @@ import { computed } from 'vue'
 import VideoItem from './VideoItem.vue'
 
 // Props
-const props = defineProps({
-  videoMonitorStatus: {
-    type: Object,
-    required: true
+defineProps({
+  isMonitoring: {
+    type: Boolean,
+    default: false
+  },
+  serverPort: {
+    type: Number,
+    default: null
+  },
+  capturedVideos: {
+    type: Array,
+    default: () => []
   },
   displayLimit: {
     type: Number,
@@ -73,17 +82,11 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits([
-  'refresh-status',
-  'clear-data',
-  'download-video',
-  'cancel-download',
-  'open-folder'
-])
+defineEmits(['refresh', 'clear-videos', 'download-video', 'cancel-download'])
 
 // 计算属性
 const displayedVideos = computed(() => {
-  return props.videoMonitorStatus.videos.slice(0, props.displayLimit)
+  return props.capturedVideos.slice(0, props.displayLimit)
 })
 
 // 方法
@@ -306,5 +309,45 @@ const openDownloadFolder = (video = null) => {
   font-size: 12px;
   color: #0369a1;
   font-style: italic;
+}
+
+.monitor-status {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.status-light {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ef4444; /* red */
+  transition: background-color 0.3s;
+}
+
+.status-light.is-monitoring {
+  background-color: #22c55e; /* green */
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
 }
 </style>

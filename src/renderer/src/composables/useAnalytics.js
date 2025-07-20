@@ -8,7 +8,7 @@ export function useAnalytics() {
 
   // 初始化Analytics
   const initializeAnalytics = async (trackingId = 'G-XXXXXXXXXX') => {
-    if (!window.api?.analytics) {
+    if (!window.api?.invoke) {
       console.warn('Analytics API不可用')
       return false
     }
@@ -17,11 +17,11 @@ export function useAnalytics() {
       isLoading.value = true
 
       // 检查用户同意状态
-      const consentResult = await window.api.analytics.getConsent()
+      const consentResult = await window.api.invoke('analytics-get-consent')
       hasConsent.value = consentResult.success && consentResult.consent
 
       if (hasConsent.value) {
-        const result = await window.api.analytics.initialize({
+        const result = await window.api.invoke('analytics-initialize', {
           trackingId,
           debug: process.env.NODE_ENV === 'development',
           customConfig: {
@@ -111,7 +111,7 @@ export function useAnalytics() {
       // 绑定事件
       document.getElementById('analytics-accept').onclick = async () => {
         try {
-          await window.api.analytics.setConsent(true)
+          await window.api.invoke('analytics-set-consent', true)
           hasConsent.value = true
           document.body.removeChild(dialog)
           resolve(true)
@@ -123,7 +123,7 @@ export function useAnalytics() {
 
       document.getElementById('analytics-decline').onclick = async () => {
         try {
-          await window.api.analytics.setConsent(false)
+          await window.api.invoke('analytics-set-consent', false)
           hasConsent.value = false
           document.body.removeChild(dialog)
           resolve(false)
@@ -140,7 +140,7 @@ export function useAnalytics() {
     if (!isInitialized.value || !hasConsent.value) return
 
     try {
-      await window.api.analytics.trackPage(pageName, customParams)
+      await window.api.invoke('analytics-track-page', pageName, customParams)
     } catch (error) {
       console.error('页面跟踪失败:', error)
     }
@@ -151,7 +151,7 @@ export function useAnalytics() {
     if (!isInitialized.value || !hasConsent.value) return
 
     try {
-      await window.api.analytics.trackEvent(eventName, parameters)
+      await window.api.invoke('analytics-track-event', eventName, parameters)
     } catch (error) {
       console.error('事件跟踪失败:', error)
     }
@@ -199,7 +199,7 @@ export function useAnalytics() {
   onMounted(async () => {
     try {
       // 检查是否已有同意状态
-      const consentResult = await window.api.analytics.getConsent()
+      const consentResult = await window.api.invoke('analytics-get-consent')
 
       if (consentResult.success && consentResult.consent !== undefined) {
         hasConsent.value = consentResult.consent

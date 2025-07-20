@@ -1,570 +1,313 @@
 <template>
-  <div class="app-container">
-    <div class="app-layout">
-      <!-- 左列：视频监控中心 -->
-      <div class="left-column">
-        <VideoMonitor
-          :video-monitor-status="videoMonitorStatus"
-          :display-limit="displayLimit"
-          @refresh-status="refreshVideoMonitorStatus"
-          @clear-data="clearVideoData"
-          @download-video="downloadVideo"
-          @cancel-download="cancelDownload"
-          @open-folder="openDownloadFolder"
-        />
-      </div>
-
-      <!-- 右列：证书管理和代理服务器 -->
-      <div class="right-column">
-        <!-- 按钮组 -->
-        <ActionButtons @show-guide="showUserGuide" @show-donation="showDonation" />
-
-        <!-- 证书管理 -->
-        <CertificateManager
-          :certificate-status="certificateStatus"
-          :is-windows="isWindows"
-          :is-mac-o-s="isMacOS"
-          @check-certificate="checkCertificate"
-          @install-certificate="installCertificate"
-          @uninstall-certificate="uninstallCertificate"
-        />
-
-        <!-- 代理服务器 -->
-        <ProxyManager
-          :system-proxy-status="systemProxyStatus"
-          :video-monitor-status="videoMonitorStatus"
-          :proxy-address="proxyAddress"
-          @start-proxy="startProxy"
-          @stop-proxy="stopProxy"
-        />
-      </div>
+  <div id="app-container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <VideoMonitor
+        :is-monitoring="isMonitoring"
+        :server-port="serverPort"
+        :captured-videos="capturedVideos"
+        @refresh="refreshAll"
+        @clear-videos="clearVideoList"
+        @download-video="downloadVideo"
+        @cancel-download="cancelDownload"
+      />
     </div>
 
-    <!-- 使用指南组件 -->
-    <UserGuide
-      :visible="showGuide"
-      @update:visible="updateGuideVisible"
-      @dont-show-again="handleDontShowAgain"
-    />
-
-    <!-- 赞赏弹窗组件 -->
-    <DonationModal :visible="showDonationModal" @update:visible="updateDonationVisible" />
+    <!-- Right Panel -->
+    <div class="right-panel">
+      <ActionButtons @start-proxy="startProxy" @stop-proxy="stopProxy" />
+      <CertificateManager
+        :certificate-status="certificateStatus"
+        :is-windows="isWindows"
+        :is-mac-o-s="isMacOS"
+        @check-certificate="checkCertificate"
+        @install-certificate="installCertificate"
+        @uninstall-certificate="uninstallCertificate"
+        @export-certificate="exportCertificate"
+      />
+      <ProxyManager :proxy-status="proxyStatus" @set-proxy="setProxy" @check-proxy="checkProxy" />
+      <UserGuide :is-first-launch="isFirstLaunch" @guide-closed="handleGuideClosed" />
+      <DonationModal />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { useAnalytics, AnalyticsEvents, AnalyticsFeatures } from './composables/useAnalytics.js'
-import { useFirstLaunch, useGuideAnalytics } from './composables/useFirstLaunch.js'
-import UserGuide from './components/UserGuide.vue'
-import DonationModal from './components/DonationModal.vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import VideoMonitor from './components/VideoMonitor.vue'
-import ActionButtons from './components/ActionButtons.vue'
 import CertificateManager from './components/CertificateManager.vue'
 import ProxyManager from './components/ProxyManager.vue'
+import ActionButtons from './components/ActionButtons.vue'
+import UserGuide from './components/UserGuide.vue'
+import DonationModal from './components/DonationModal.vue'
+import { useAnalytics } from './composables/useAnalytics.js'
+import { useFirstLaunch } from './composables/useFirstLaunch.js'
 
-// Analytics组合式函数
-const analytics = useAnalytics()
+const { trackEvent } = useAnalytics()
+const { isFirstLaunch, setLaunched } = useFirstLaunch()
 
-// 首次启动和指南相关
-const { showGuide, setDontShowAgain } = useFirstLaunch()
-const { trackGuideShown, trackGuideClosed } = useGuideAnalytics()
-
-// 赞赏弹窗状态
-const showDonationModal = ref(false)
-
-// 操作系统检测
-const isWindows = computed(() => {
-  return navigator.userAgent.includes('Windows') || navigator.platform.includes('Win')
-})
-
-const isMacOS = computed(() => {
-  return navigator.userAgent.includes('Mac') || navigator.platform.includes('Mac')
-})
-
-// 证书管理相关
+const isMonitoring = ref(false)
+const serverPort = ref(null)
+const capturedVideos = ref([])
 const certificateStatus = ref({
   exists: false,
   installed: false,
   path: '',
   loading: false
 })
-
-// 合并后的视频监控状态
-const videoMonitorStatus = ref({
-  // 代理状态
-  isProxyRunning: false,
-  totalRequests: 0,
-  weixinRequests: 0,
-  injectedPages: 0,
-  lastActivity: null,
-  // 视频数据
-  totalCapturedCount: 0,
-  videos: []
-})
-
-// 系统代理状态
-const systemProxyStatus = ref({
+const proxyStatus = ref({
   enabled: false,
   loading: false
 })
 
-// 显示限制
-const displayLimit = 10
+const isWindows = computed(() => navigator.platform.includes('Win'))
+const isMacOS = computed(() => navigator.platform.includes('Mac'))
 
-// 代理地址
-const proxyAddress = ref('127.0.0.1:57392')
+// --- Main Actions ---
 
-// 监听状态更新
-let unsubscribeMonitoring = null
-let unsubscribeVideoCapture = null
-
-// 检查证书状态
-const checkCertificate = async () => {
+const startProxy = async () => {
   try {
-    certificateStatus.value.loading = true
-    const result = await window.electron.ipcRenderer.invoke('check-certificate')
-    certificateStatus.value = { ...result, loading: false }
+    await window.api.invoke('start-proxy')
+    refreshAll()
+    trackEvent('proxy_started')
   } catch (error) {
-    console.error('检查证书失败:', error)
+    console.error('Failed to start proxy:', error)
+  }
+}
+
+const stopProxy = async () => {
+  try {
+    await window.api.invoke('stop-proxy')
+    refreshAll()
+    trackEvent('proxy_stopped')
+  } catch (error) {
+    console.error('Failed to stop proxy:', error)
+  }
+}
+
+// --- Certificate Management ---
+
+const checkCertificate = async () => {
+  certificateStatus.value.loading = true
+  try {
+    const result = await window.api.invoke('check-certificate')
+    certificateStatus.value = { ...certificateStatus.value, ...result, loading: false }
+  } catch (error) {
+    console.error('Failed to check certificate:', error)
     certificateStatus.value.loading = false
   }
 }
 
-// 安装证书
 const installCertificate = async () => {
+  certificateStatus.value.loading = true
   try {
-    certificateStatus.value.loading = true
-    const result = await window.electron.ipcRenderer.invoke('install-certificate')
-    if (result.success) {
-      await checkCertificate()
-    } else {
-      console.error('安装证书失败:', result.error)
-    }
+    await window.api.invoke('install-certificate')
   } catch (error) {
-    console.error('安装证书失败:', error)
+    console.error('Failed to install certificate:', error)
+  } finally {
+    certificateStatus.value.loading = false
   }
-  certificateStatus.value.loading = false
 }
 
-// 卸载证书
 const uninstallCertificate = async () => {
+  certificateStatus.value.loading = true
   try {
-    certificateStatus.value.loading = true
-    const result = await window.electron.ipcRenderer.invoke('uninstall-certificate')
-    if (result.success) {
-      await checkCertificate()
-    } else {
-      console.error('卸载证书失败:', result.error)
-    }
+    await window.api.invoke('uninstall-certificate')
   } catch (error) {
-    console.error('卸载证书失败:', error)
-  }
-  certificateStatus.value.loading = false
-}
-
-// 启动代理
-const startProxy = async () => {
-  try {
-    systemProxyStatus.value.loading = true
-
-    // 跟踪代理启动事件
-    analytics.trackFeature(AnalyticsFeatures.PROXY_CONTROL, 'start_proxy')
-
-    const result = await window.api.startProxy()
-    console.log('启动代理结果:', result)
-    if (result.success) {
-      console.log('✅ 代理启动成功:', result.message)
-      analytics.trackEvent(AnalyticsEvents.PROXY_START, { success: true })
-    } else {
-      console.error('❌ 代理启动失败:', result.message)
-      analytics.trackEvent(AnalyticsEvents.PROXY_START, { success: false, error: result.message })
-    }
-    await refreshVideoMonitorStatus()
-  } catch (error) {
-    console.error('启动代理失败:', error)
-    analytics.trackError(error, 'proxy_start')
-    systemProxyStatus.value.loading = false
+    console.error('Failed to uninstall certificate:', error)
+  } finally {
+    certificateStatus.value.loading = false
   }
 }
 
-// 停止代理
-const stopProxy = async () => {
+const exportCertificate = async () => {
+  certificateStatus.value.loading = true
   try {
-    systemProxyStatus.value.loading = true
-
-    // 跟踪代理停止事件
-    analytics.trackFeature(AnalyticsFeatures.PROXY_CONTROL, 'stop_proxy')
-
-    const result = await window.api.stopProxy()
-    console.log('停止代理结果:', result)
-    if (result.success) {
-      console.log('✅ 代理停止成功:', result.message)
-      analytics.trackEvent(AnalyticsEvents.PROXY_STOP, { success: true })
-    } else {
-      console.error('❌ 代理停止失败:', result.message)
-    }
-    await refreshVideoMonitorStatus()
+    await window.api.invoke('export-certificate')
   } catch (error) {
-    console.error('停止代理失败:', error)
-    systemProxyStatus.value.loading = false
+    console.error('Failed to export certificate:', error)
+  } finally {
+    certificateStatus.value.loading = false
   }
 }
 
-// 刷新视频监控状态 (合并原来的两个函数)
+// --- Proxy Management ---
+
+const checkProxy = async () => {
+  proxyStatus.value.loading = true
+  try {
+    const result = await window.api.invoke('check-proxy')
+    proxyStatus.value = { ...result, loading: false }
+  } catch (error) {
+    console.error('Failed to check proxy:', error)
+    proxyStatus.value.loading = false
+  }
+}
+
+const setProxy = async (enable) => {
+  proxyStatus.value.loading = true
+  try {
+    await window.api.invoke('set-proxy', enable)
+  } catch (error) {
+    console.error(`Failed to ${enable ? 'set' : 'unset'} proxy:`, error)
+  } finally {
+    proxyStatus.value.loading = false
+  }
+}
+
+// --- Video & Monitoring ---
+
 const refreshVideoMonitorStatus = async () => {
   try {
-    // 获取监听状态
-    const monitoringStatus = await window.api.getMonitoringStatus()
-    // 获取视频数据
-    const videos = await window.api.getCapturedVideos()
-
-    // 获取系统代理状态
-    try {
-      const proxyStatusResult = await window.api.getProxyStatus()
-      if (proxyStatusResult.success) {
-        systemProxyStatus.value = {
-          enabled: proxyStatusResult.enabled || false,
-          loading: false
-        }
-      }
-    } catch (error) {
-      console.error('获取系统代理状态失败:', error)
-      systemProxyStatus.value.loading = false
-    }
-
-    // 合并状态
-    videoMonitorStatus.value = {
-      ...monitoringStatus,
-      totalCapturedCount: videos.length,
-      videos: videos
-    }
+    const status = await window.api.invoke('get-monitoring-status')
+    isMonitoring.value = status.isMonitoring
+    serverPort.value = status.port
   } catch (error) {
-    console.error('刷新视频监控状态失败:', error)
+    console.error('Failed to refresh video monitor status:', error)
   }
 }
 
-// 清空视频数据
-const clearVideoData = async () => {
+const fetchCapturedVideos = async () => {
   try {
-    if (confirm('确定要清空所有捕获的视频数据吗？此操作不可撤销。')) {
-      await window.api.clearCapturedVideos()
-      await refreshVideoMonitorStatus()
-    }
+    const videos = await window.api.invoke('get-captured-videos')
+    capturedVideos.value = videos
   } catch (error) {
-    console.error('清空视频数据失败:', error)
+    console.error('Failed to fetch captured videos:', error)
   }
 }
 
-// 下载相关功能
-const downloadVideo = async (video) => {
+const clearVideoList = async () => {
   try {
-    // 跟踪下载开始事件
-    analytics.trackFeature(AnalyticsFeatures.VIDEO_DOWNLOAD, 'download_start')
+    await window.api.invoke('clear-captured-videos')
+    capturedVideos.value = []
+    trackEvent('video_list_cleared', { video_count: capturedVideos.value.length })
+  } catch (error) {
+    console.error('Failed to clear video list:', error)
+  }
+}
 
-    // 检查必要的下载参数
-    if (!video.url || !video.decode_key) {
-      alert('视频信息不完整，无法下载')
-      analytics.trackEvent('download_error', { error: 'missing_parameters' })
-      return
-    }
+// --- Download Management ---
+const downloadVideo = (video) => {
+  window.api.invoke('download-video', video.id)
+}
 
-    // 设置下载状态
-    video.downloading = true
-    video.downloadProgress = 0
-    video.downloaded = false
+const cancelDownload = (videoId) => {
+  window.api.invoke('cancel-download', videoId)
+}
 
-    // 处理 title 和 description，截取第一个 \n 之前的内容
-    const processText = (text) => {
-      try {
-        if (!text || typeof text !== 'string') return ''
-        return String(text).split('\n')[0].trim()
-      } catch (error) {
-        console.error('❌ processText 错误:', error, 'input:', text)
-        return '处理错误'
-      }
-    }
+// --- Lifecycle & IPC ---
 
-    const processedTitle = processText(video.title) || processText(video.description) || '未知标题'
-    const processedDescription = processText(video.description)
+const handleGuideClosed = (dontShowAgain) => {
+  if (dontShowAgain) {
+    setLaunched()
+  }
+}
 
-    // 调用主进程的下载方法 - 只传递必要的序列化数据
-    const videoData = {
-      id: String(video.id || 'unknown'),
-      title: String(processedTitle || 'unknown'),
-      description: String(processedDescription || ''),
-      url: String(video.url || ''),
-      decode_key: String(video.decode_key || ''),
-      size: Number(video.size) || 0,
-      uploader: String(video.uploader || ''),
-      media_type: String(video.media_type || 'video'),
-      timestamp: Number(video.timestamp) || Date.now(),
-      capturedAt: Number(video.capturedAt) || Date.now()
-    }
+const refreshAll = () => {
+  checkCertificate()
+  checkProxy()
+  refreshVideoMonitorStatus()
+  fetchCapturedVideos()
+}
 
-    const result = await window.api.downloadVideo(videoData)
-
-    if (result.success) {
-      video.downloading = false
-      video.downloaded = true
-      video.downloadPath = result.filePath
-      video.downloadSize = result.fileSize
+onMounted(() => {
+  window.api.on('install-certificate-reply', (response) => {
+    if (response.success) {
+      alert('证书安装成功！')
     } else {
-      console.error('下载失败:', result.message)
-      video.downloading = false
-      // 只有非取消下载的错误才显示弹窗
-      if (!result.message.includes('下载已被取消')) {
-        alert(`下载失败: ${result.message}`)
-      }
+      alert(`证书安装失败: ${response.error}`)
     }
-  } catch (error) {
-    console.error('❌ 下载视频失败:', error)
-    console.error('错误堆栈:', error.stack)
-    video.downloading = false
-    // 只有非取消下载的错误才显示弹窗
-    if (!error.message.includes('下载已被取消')) {
-      alert(`下载失败: ${error.message}`)
-    }
-  }
-}
+    checkCertificate()
+  })
 
-const cancelDownload = async (video) => {
-  try {
-    console.log('🚫 取消下载:', video.title)
-
-    // 调用后端取消下载API
-    const result = await window.api.cancelDownload(video.id)
-
-    if (result.success) {
-      console.log('✅ 下载取消成功:', result.message)
-      // UI状态会通过下载取消事件自动更新
+  window.api.on('uninstall-certificate-reply', (response) => {
+    if (response.success) {
+      alert('证书卸载成功！')
     } else {
-      console.error('❌ 取消下载失败:', result.message)
-      // 手动重置状态作为备选
-      video.downloading = false
-      video.downloadProgress = 0
+      alert(`证书卸载失败: ${response.error}`)
     }
-  } catch (error) {
-    console.error('取消下载失败:', error)
-    // 手动重置状态作为备选
-    video.downloading = false
-    video.downloadProgress = 0
-  }
-}
+    checkCertificate()
+  })
 
-const openDownloadFolder = async (video) => {
-  try {
-    if (video.downloadPath) {
-      // 打开到具体文件
-      await window.api.showDownloadedFile(video.downloadPath)
+  window.api.on('export-certificate-reply', (response) => {
+    if (response.success) {
+      alert(`证书已成功导出到: ${response.path}`)
     } else {
-      // 打开下载文件夹
-      await window.api.openDownloadFolder()
+      alert(`导出证书失败: ${response.error}`)
     }
-  } catch (error) {
-    console.error('打开文件夹失败:', error)
-    alert(`打开文件夹失败: ${error.message}`)
-  }
-}
+    checkCertificate()
+  })
 
-// 监听状态更新
-const setupStatusListeners = () => {
-  // 监听代理状态和网络活动
-  if (window.api && window.api.onMonitoringStatusUpdate) {
-    unsubscribeMonitoring = window.api.onMonitoringStatusUpdate((status) => {
-      // 更新代理相关状态
-      videoMonitorStatus.value.isProxyRunning = status.isProxyRunning
-      videoMonitorStatus.value.totalRequests = status.totalRequests
-      videoMonitorStatus.value.weixinRequests = status.weixinRequests
-      videoMonitorStatus.value.injectedPages = status.injectedPages
-      videoMonitorStatus.value.lastActivity = status.lastActivity
-    })
-  }
+  window.api.on('set-proxy-reply', (response) => {
+    if (response.success) {
+      alert('系统代理设置成功！')
+    } else {
+      alert(`系统代理设置失败: ${response.error}`)
+    }
+    checkProxy()
+  })
 
-  // 监听视频捕获更新
-  if (window.api && window.api.onVideoCaptured) {
-    unsubscribeVideoCapture = window.api.onVideoCaptured((newVideo) => {
-      // 添加新视频到列表开头
-      videoMonitorStatus.value.videos.unshift(newVideo)
-      videoMonitorStatus.value.totalCapturedCount = videoMonitorStatus.value.videos.length
-    })
-  }
+  window.api.on('video-data-captured', (video) => {
+    const existingVideo = capturedVideos.value.find((v) => v.id === video.id)
+    if (existingVideo) {
+      Object.assign(existingVideo, video)
+    } else {
+      capturedVideos.value.unshift(video)
+    }
+  })
 
-  // 监听下载进度更新
-  if (window.api && window.api.onDownloadProgress) {
-    window.api.onDownloadProgress((data) => {
-      const video = videoMonitorStatus.value.videos.find((v) => v.id === data.videoId)
-      if (video) {
-        video.downloadProgress = data.progress
-      }
-    })
-  }
+  window.api.on('download-progress', ({ videoId, percent }) => {
+    const video = capturedVideos.value.find((v) => v.id === videoId)
+    if (video) {
+      video.downloadPercent = percent
+      video.status = 'downloading'
+    }
+  })
 
-  // 监听下载完成
-  if (window.api && window.api.onDownloadCompleted) {
-    window.api.onDownloadCompleted((data) => {
-      const video = videoMonitorStatus.value.videos.find((v) => v.id === data.videoId)
-      if (video) {
-        video.downloading = false
-        video.downloaded = true
-        video.downloadPath = data.filePath
-        video.downloadSize = data.fileSize
-      }
-    })
-  }
+  window.api.on('download-completed', ({ videoId, filePath }) => {
+    const video = capturedVideos.value.find((v) => v.id === videoId)
+    if (video) {
+      video.status = 'completed'
+      video.filePath = filePath
+    }
+  })
 
-  // 监听下载失败
-  if (window.api && window.api.onDownloadFailed) {
-    window.api.onDownloadFailed((data) => {
-      const video = videoMonitorStatus.value.videos.find((v) => v.id === data.videoId)
-      if (video) {
-        video.downloading = false
-        video.downloadProgress = 0
-      }
-    })
-  }
+  window.api.on('download-failed', ({ videoId, error }) => {
+    const video = capturedVideos.value.find((v) => v.id === videoId)
+    if (video) {
+      video.status = 'failed'
+      video.error = error
+    }
+    alert(`视频 [${video.title}] 下载失败: ${error}`)
+  })
 
-  // 监听下载取消
-  if (window.api && window.api.onDownloadCancelled) {
-    window.api.onDownloadCancelled((data) => {
-      const video = videoMonitorStatus.value.videos.find((v) => v.id === data.videoId)
-      if (video) {
-        video.downloading = false
-        video.downloadProgress = 0
-        console.log('📋 UI状态已重置，下载已取消:', video.title)
-      }
-    })
-  }
-}
-
-// 使用指南相关方法
-const showUserGuide = () => {
-  showGuide.value = true
-  trackGuideShown(false) // 手动打开
-}
-
-// 赞赏相关方法
-const showDonation = () => {
-  showDonationModal.value = true
-  // 跟踪赞赏弹窗显示事件
-  analytics.trackFeature(AnalyticsFeatures.USER_ENGAGEMENT, 'donation_modal_shown')
-}
-
-const updateDonationVisible = (visible) => {
-  showDonationModal.value = visible
-  if (!visible) {
-    // 跟踪赞赏弹窗关闭事件
-    analytics.trackFeature(AnalyticsFeatures.USER_ENGAGEMENT, 'donation_modal_closed')
-  }
-}
-
-const updateGuideVisible = (visible) => {
-  showGuide.value = visible
-}
-
-const handleDontShowAgain = (dontShow) => {
-  setDontShowAgain(dontShow)
-  trackGuideClosed(dontShow)
-}
-
-// 清理监听器
-const cleanup = () => {
-  if (unsubscribeMonitoring) {
-    unsubscribeMonitoring()
-    unsubscribeMonitoring = null
-  }
-  if (unsubscribeVideoCapture) {
-    unsubscribeVideoCapture()
-    unsubscribeVideoCapture = null
-  }
-}
-
-// 组件挂载
-onMounted(async () => {
-  await checkCertificate()
-  await refreshVideoMonitorStatus()
-  setupStatusListeners()
-
-  // 检查是否是首次启动，如果是则显示指南
-  // useFirstLaunch composable会自动处理首次启动检测
-  if (showGuide.value) {
-    trackGuideShown(true) // 首次启动自动显示
-  }
-})
-
-// 组件卸载时清理
-onUnmounted(() => {
-  cleanup()
+  refreshAll()
 })
 </script>
 
-<style scoped>
-/* 全屏布局 - 现代简洁设计 */
-.app-container {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'SF Pro Display', sans-serif;
-  height: 100vh;
-  overflow: hidden;
-  background: #f8fafc;
-  position: relative;
-}
-
-/* 左右布局 - 简洁设计 */
-.app-layout {
+<style>
+/* Global styles remain the same */
+#app-container {
   display: flex;
   height: 100vh;
-  gap: 16px;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
 }
 
-/* 左列：视频监控中心 */
-.left-column {
+.left-panel {
   flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 1px solid #dcdfe6;
+}
+
+.right-panel {
+  width: 280px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-}
-
-/* 右列：证书管理和代理服务器 */
-.right-column {
-  width: 320px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  overflow: auto;
-}
-
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .app-layout {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .right-column {
-    width: 100%;
-    flex-direction: row;
-    gap: 15px;
-  }
-
-  .left-column {
-    height: auto;
-  }
-}
-
-@media (max-width: 768px) {
-  .right-column {
-    flex-direction: column;
-  }
-
-  .app-layout {
-    padding: 8px;
-    gap: 8px;
-  }
+  gap: 16px;
+  background-color: #ffffff;
 }
 </style>

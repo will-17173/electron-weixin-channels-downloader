@@ -1,6 +1,7 @@
-// 证书管理器基类 - 定义统一接口
-import fs from 'fs'
-import path from 'path'
+const fs = require('fs-extra')
+const path = require('path')
+const os = require('os')
+const { dialog } = require('electron')
 
 class BaseCertificateManager {
   constructor(sslCaDir) {
@@ -13,80 +14,33 @@ class BaseCertificateManager {
 
   /**
    * 检查证书文件是否存在
+   * @returns {boolean}
    */
   certificateExists() {
     return fs.existsSync(this.caCertPath)
   }
 
   /**
-   * 获取证书路径
+   * 获取证书文件路径
+   * @returns {string}
    */
   getCertificatePath() {
     return this.caCertPath
   }
 
   /**
-   * 获取平台类型
+   * 获取当前平台
+   * @returns {string}
    */
   getPlatform() {
     return this.platform
   }
 
-  // ============ 抽象方法 - 子类必须实现 ============
-
   /**
-   * 获取证书的通用名称（CN）
-   * @abstract
+   * 验证证书内容和元数据
+   * @returns {{valid: boolean, error?: string, details?: object}}
    */
-  async getCertificateCommonName() {
-    throw new Error('getCertificateCommonName() 方法必须在子类中实现')
-  }
-
-  /**
-   * 安装证书到系统存储
-   * @abstract
-   */
-  async installCertificate() {
-    throw new Error('installCertificate() 方法必须在子类中实现')
-  }
-
-  /**
-   * 检查证书是否已安装
-   * @abstract
-   */
-  async isCertificateInstalled() {
-    throw new Error('isCertificateInstalled() 方法必须在子类中实现')
-  }
-
-  /**
-   * 卸载证书
-   * @abstract
-   */
-  async uninstallCertificate() {
-    throw new Error('uninstallCertificate() 方法必须在子类中实现')
-  }
-
-  /**
-   * 自动管理证书（安装或重新安装）
-   * @abstract
-   */
-  async autoManageCertificate() {
-    throw new Error('autoManageCertificate() 方法必须在子类中实现')
-  }
-
-  // ============ 通用工具方法 ============
-
-  /**
-   * 等待指定时间
-   */
-  async sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
-  }
-
-  /**
-   * 验证证书文件格式
-   */
-  validateCertificateFile() {
+  validateCertificate() {
     if (!this.certificateExists()) {
       return { valid: false, error: '证书文件不存在' }
     }
@@ -96,18 +50,20 @@ class BaseCertificateManager {
       if (!content.includes('BEGIN CERTIFICATE') || !content.includes('END CERTIFICATE')) {
         return { valid: false, error: '证书文件格式不正确' }
       }
-      return { valid: true }
     } catch (error) {
       return { valid: false, error: `读取证书文件失败: ${error.message}` }
     }
+
+    return { valid: true }
   }
 
   /**
-   * 获取证书文件信息
+   * 获取证书文件详细信息
+   * @returns {{size: number, created: Date, modified: Date, path: string} | {error: string}}
    */
-  getCertificateFileInfo() {
+  getCertificateDetails() {
     if (!this.certificateExists()) {
-      return null
+      return { error: '证书文件不存在' }
     }
 
     try {
@@ -119,8 +75,33 @@ class BaseCertificateManager {
         path: this.caCertPath
       }
     } catch (error) {
-      console.error('获取证书文件信息失败:', error.message)
-      return null
+      return { error: `获取证书详情失败: ${error.message}` }
+    }
+  }
+
+  async exportCertificate() {
+    if (!this.certificateExists()) {
+      return { success: false, error: '证书文件不存在，无法导出' }
+    }
+
+    try {
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: '导出证书',
+        defaultPath: path.join(os.homedir(), 'wechat-video-downloader-cert.crt'),
+        filters: [{ name: 'Certificates', extensions: ['crt'] }]
+      })
+
+      if (canceled || !filePath) {
+        console.log('用户取消了导出操作')
+        return { success: false, error: '用户取消了导出操作' }
+      }
+
+      await fs.copy(this.caCertPath, filePath)
+      console.log(`证书已成功导出到: ${filePath}`)
+      return { success: true, path: filePath }
+    } catch (error) {
+      console.error(`导出证书时出错: ${error.message}`)
+      return { success: false, error: error.message }
     }
   }
 }

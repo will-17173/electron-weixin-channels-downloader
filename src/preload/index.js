@@ -1,87 +1,82 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
-const api = {
-  // 证书管理API
-  installCertificate: () => ipcRenderer.invoke('install-certificate'),
-  checkCertificate: () => ipcRenderer.invoke('check-certificate'),
-  uninstallCertificate: () => ipcRenderer.invoke('uninstall-certificate'),
-
-  // 管理员权限API (保留检查功能)
-  checkAdminStatus: () => ipcRenderer.invoke('check-admin-status'),
-
-  // 监听状态API
-  getMonitoringStatus: () => ipcRenderer.invoke('get-monitoring-status'),
-  onMonitoringStatusUpdate: (callback) => {
-    ipcRenderer.on('monitoring-status-update', (_event, status) => callback(status))
-    // 返回取消监听的函数
-    return () => ipcRenderer.removeAllListeners('monitoring-status-update')
+// --- Expose a subset of ipcRenderer to the renderer process ---
+contextBridge.exposeInMainWorld('api', {
+  // --- Invoke (send to main and expect a response) ---
+  invoke: (channel, ...args) => {
+    // Whitelist of channels allowed to be invoked
+    const whiteListedChannels = [
+      'check-certificate',
+      'install-certificate',
+      'uninstall-certificate',
+      'export-certificate', // Added for export functionality
+      'check-proxy',
+      'set-proxy',
+      'check-admin-status',
+      'get-monitoring-status',
+      'get-captured-videos',
+      'clear-captured-videos',
+      'download-video',
+      'cancel-download',
+      'open-download-folder',
+      'show-downloaded-file',
+      'start-proxy',
+      'stop-proxy',
+      'get-proxy-status',
+      'analytics-initialize',
+      'analytics-track-event',
+      'analytics-track-page',
+      'analytics-set-consent',
+      'analytics-get-consent'
+    ]
+    if (whiteListedChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, ...args)
+    }
+    // Optionally, you can throw an error for security reasons
+    // throw new Error(`Channel "${channel}" is not allowed for invoke.`)
   },
 
-  // 视频数据API
-  getCapturedVideos: () => ipcRenderer.invoke('get-captured-videos'),
-  clearCapturedVideos: () => ipcRenderer.invoke('clear-captured-videos'),
-  onVideoCaptured: (callback) => {
-    ipcRenderer.on('video-data-captured', (_event, videoData) => callback(videoData))
-    return () => ipcRenderer.removeAllListeners('video-data-captured')
+  // --- On (listen for events from main) ---
+  on: (channel, listener) => {
+    // Whitelist of channels allowed to be subscribed to
+    const whiteListedChannels = [
+      'check-certificate-reply',
+      'install-certificate-reply',
+      'uninstall-certificate-reply',
+      'export-certificate-reply', // Added for export functionality
+      'check-proxy-reply',
+      'set-proxy-reply',
+      'proxy-status-change',
+      'monitoring-status-update',
+      'video-data-captured',
+      'download-progress',
+      'download-completed',
+      'download-failed',
+      'download-cancelled'
+    ]
+    if (whiteListedChannels.includes(channel)) {
+      // Deliberately strip event as it includes `sender`
+      ipcRenderer.on(channel, (event, ...args) => listener(...args))
+    }
+    // Optionally, you can throw an error for security reasons
+    // throw new Error(`Channel "${channel}" is not allowed for on.`)
   },
 
-  // 下载相关API
-  downloadVideo: (videoData) => ipcRenderer.invoke('download-video', videoData),
-  cancelDownload: (videoId) => ipcRenderer.invoke('cancel-download', videoId),
-  openDownloadFolder: () => ipcRenderer.invoke('open-download-folder'),
-  showDownloadedFile: (filePath) => ipcRenderer.invoke('show-downloaded-file', filePath),
-
-  // 下载进度监听
-  onDownloadProgress: (callback) => {
-    ipcRenderer.on('download-progress', (_event, data) => callback(data))
-    return () => ipcRenderer.removeAllListeners('download-progress')
+  // --- Once (listen for a single event from main) ---
+  once: (channel, listener) => {
+    const whiteListedChannels = [] // Define if needed
+    if (whiteListedChannels.includes(channel)) {
+      ipcRenderer.once(channel, (event, ...args) => listener(...args))
+    }
   },
 
-  onDownloadCompleted: (callback) => {
-    ipcRenderer.on('download-completed', (_event, data) => callback(data))
-    return () => ipcRenderer.removeAllListeners('download-completed')
+  // --- Remove Listener ---
+  removeListener: (channel, listener) => {
+    ipcRenderer.removeListener(channel, listener)
   },
 
-  onDownloadFailed: (callback) => {
-    ipcRenderer.on('download-failed', (_event, data) => callback(data))
-    return () => ipcRenderer.removeAllListeners('download-failed')
-  },
-
-  onDownloadCancelled: (callback) => {
-    ipcRenderer.on('download-cancelled', (_event, data) => callback(data))
-    return () => ipcRenderer.removeAllListeners('download-cancelled')
-  },
-
-  // 代理控制API
-  startProxy: () => ipcRenderer.invoke('start-proxy'),
-  stopProxy: () => ipcRenderer.invoke('stop-proxy'),
-  getProxyStatus: () => ipcRenderer.invoke('get-proxy-status'),
-
-  // Analytics API
-  analytics: {
-    initialize: (options) => ipcRenderer.invoke('analytics-initialize', options),
-    trackEvent: (eventName, parameters) =>
-      ipcRenderer.invoke('analytics-track-event', eventName, parameters),
-    trackPage: (pageName, customParams) =>
-      ipcRenderer.invoke('analytics-track-page', pageName, customParams),
-    setConsent: (consent) => ipcRenderer.invoke('analytics-set-consent', consent),
-    getConsent: () => ipcRenderer.invoke('analytics-get-consent')
+  // --- Remove All Listeners ---
+  removeAllListeners: (channel) => {
+    ipcRenderer.removeAllListeners(channel)
   }
-}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  window.electron = electronAPI
-  window.api = api
-}
+})
