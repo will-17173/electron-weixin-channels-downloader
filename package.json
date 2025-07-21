@@ -11,7 +11,7 @@
   ],
   "main": "./out/main/index.js",
   "author": "Will.H",
-  "homepage": "https://www.wxdown.xyz",
+  "homepage": "https://wxdown.xyz",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -21,6 +21,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
     "obfuscate": "node scripts/obfuscate.js",
     "release": "powershell -ExecutionPolicy Bypass -File scripts/release.ps1",
     "clean": "Remove-Item -Path dist,out -Recurse -Force -ErrorAction SilentlyContinue"
